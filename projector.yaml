@@ -1,5 +1,5 @@
 esphome:
-  name: projector_rs232-bridge
+  name: projector-rs232-bridge
   friendly_name: Sony Projector
 
 esp32:
