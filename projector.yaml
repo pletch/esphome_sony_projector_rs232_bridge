@@ -1,0 +1,89 @@
+esphome:
+  name: rs232-bridge
+  friendly_name: Projector RS232 Bridge
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+external_components:
+  - source:
+      type: local
+      path: components
+
+logger:
+  level: INFO
+
+api:
+  services:
+    - service: set_input
+      variables:
+        input: string   # ADCP id, e.g. "hdmi1", "hdmi2"
+      then:
+        - lambda: |-
+            id(projector).set_input(input);
+    - service: send_command
+      variables:
+        command: string
+      then:
+        - lambda: |-
+            id(projector).send_command(command);
+    - service: send_raw
+      variables:
+        payload: int[]
+      then:
+        - lambda: |-
+            std::vector<uint8_t> bytes(payload.begin(), payload.end());
+            id(projector).send_raw(bytes);
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  reboot_timeout: 10min
+
+uart:
+  id: projector_uart
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+  baud_rate: 38400
+  data_bits: 8
+  parity: EVEN
+  stop_bits: 1
+
+sony_projector:
+  id: projector
+  uart_id: projector_uart
+  update_interval: 30s
+  power:
+    name: "Projector Power"
+  status:
+    name: "Projector Status"
+  light_source_hours:
+    name: "Projector Light Source Hours"
+    unit_of_measurement: "h"
+    icon: mdi:lightbulb-on-outline
+  temperature:
+    name: "Projector Temperature"
+  filter_status:
+    name: "Projector Filter Status"
+    icon: mdi:air-filter
+  model_name:
+    name: "Projector Model"
+    icon: mdi:projector
+  input:
+    name: "Projector Input"
+    icon: mdi:video-input-hdmi
+    # Trim/extend to match the inputs your specific model exposes
+    # (see SUPPORTED COMMAND LIST §2-2-1).
+    options:
+      - hdmi1
+      - hdmi2
+
+button:
+  - platform: restart
+    name: "Projector Bridge Restart"
