@@ -11,7 +11,7 @@ external_components:
   - source:
       type: git
       url: https://github.com/pletch/esphome_sony_projector_rs232_bridge
-      ref: main
+      ref: master
     components: [sony_projector]
 
 logger:
